@@ -8,7 +8,7 @@ export default function NewPost() {
         setShowButton(!ShowButton);
     }
     return (
-       <div className="absolute right-20 bottom-0 size-20">
+       <div className="fixed right-20 bottom-20 size-20">
             {ShowButton && <button onClick={toggleButton}><NewPostIcon /></button>}
             {!ShowButton && <div className="absolute right-20 bottom-0 bg-neutral-100 shadow-lg p-5 border rounded-md">
                 <input type="text" placeholder="Title" className="border rounded-md p-2 m-2" />

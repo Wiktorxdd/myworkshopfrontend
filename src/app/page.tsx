@@ -1,19 +1,27 @@
 "use client";
 
-import Logo from "@/components/Header/Logo";
-import Header from "../components/Header";
-import Image from "next/image";
-import Login from "@/components/Login/Index";
-
-import placeholder from "../../public/placeholder.svg";
+import Login from "@/components/Login/login";
+import { useState } from "react";
+import Register from "@/components/Login/register";
 
 export default function Home() {
+  const [ShowRegister, setShowRegister] = useState(true);
+
+  const toggleButton = () => {
+    setShowRegister(!ShowRegister);
+}
+
+
   return (
     <main className="flex items-center justify-center md:h-screen">
-      <div className="relative mx-auto flex w-full max-w-[400px] flex-col space-y-2.5 p-7 md:-mt-32">
+      {ShowRegister && <div className="relative mx-auto flex w-full max-w-[400px] flex-col space-y-2.5 p-7 md:-mt-32">
         <Login />
-      </div>
-        
+        <button onClick={toggleButton} className="text-blue-600 hover:text-blue-800">Register</button>
+      </div>}
+      {!ShowRegister && <div className="relative mx-auto flex w-full max-w-[400px] flex-col space-y-2.5 p-7 md:-mt-32">
+        <Register />
+        <button onClick={toggleButton} className="text-blue-600 hover:text-blue-800">Login Instead</button>
+      </div>}
     </main>
   )
 }

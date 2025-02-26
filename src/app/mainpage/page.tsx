@@ -67,9 +67,7 @@ export default function Home() {
                     </ul>
                 </main>
                 <div className=""><NewPost /></div>
-                <footer className="bg-gray-800 text-white p-4 text-center">
-                    © 2025 Wiktor Kevin Marcus
-                </footer>
+          
             </div>
         </Suspense>
     );

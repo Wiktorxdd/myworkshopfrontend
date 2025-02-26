@@ -16,5 +16,59 @@
         "date": "2023-07-25",
         "category": "Health & Fitness",
         "userId": 2
+    },
+    {
+        "id": 3,
+        "title": "Lorem Ipsum - What Is It and How to Use It?",
+        "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ...",
+        "author": "John Doe",
+        "date": "2023-08-01",
+        "category": "Technology",
+        "userId": 1
+    },
+    {
+        "id": 4,
+        "title": "The Benefits of Regular Exercise",
+        "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ...",
+        "author": "Jane Smith",
+        "date": "2023-07-25",
+        "category": "Health & Fitness",
+        "userId": 2
+    },
+    {
+        "id": 5,
+        "title": "Lorem Ipsum - What Is It and How to Use It?",
+        "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ...",
+        "author": "John Doe",
+        "date": "2023-08-01",
+        "category": "Technology",
+        "userId": 1
+    },
+    {
+        "id": 6,
+        "title": "The Benefits of Regular Exercise",
+        "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ...",
+        "author": "Jane Smith",
+        "date": "2023-07-25",
+        "category": "Health & Fitness",
+        "userId": 2
+    },
+    {
+        "id": 7,
+        "title": "Lorem Ipsum - What Is It and How to Use It?",
+        "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ...",
+        "author": "John Doe",
+        "date": "2023-08-01",
+        "category": "Technology",
+        "userId": 1
+    },
+    {
+        "id": 8,
+        "title": "The Benefits of Regular Exercise",
+        "content": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. ...",
+        "author": "Jane Smith",
+        "date": "2023-07-25",
+        "category": "Health & Fitness",
+        "userId": 2
     }
 ]
