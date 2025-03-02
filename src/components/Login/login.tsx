@@ -36,7 +36,7 @@ export default function Login() {
     
     return (
         <form className="space-y-3 " onSubmit={handleSubmit}>
-            <div className="flex-1 rounded-lg bg-cyan-200 px-6 pb-4 pt-8 bg-neutral-200 shadow-xl">
+            <div className="flex-1 rounded-lg px-6 pb-4 pt-8 bg-neutral-200 shadow-xl">
                 <h1 className="mb-3 text-2xl">Login</h1>
                 <div className="w-full">
                     <div>

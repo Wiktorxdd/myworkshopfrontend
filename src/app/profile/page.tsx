@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react";
 import { usersGet } from "../api/users/route";
-
+import SideBar from "@/components/sidebar";
 
 export default function Profile() {
     const router = useRouter();
@@ -26,20 +26,23 @@ export default function Profile() {
 
     console.log(router);
     return (
-        <div>
-            <h1>List of Profiles</h1>
-            <div>
-                <ul className="p-10">
-                    {users.map((user) => (
-                        <li key={user.id}>
-                            <Link href={`/profile/${user.id}`}>
-                                {user.name}
-                            </Link>
-                        </li>
-                    ))}
-                </ul>
+        <main>
+            <div className="flex flex-col items-center justify-center">
+                <h1>List of Profiles</h1>
+                <div >
+                    <ul className="p-10">
+                        {users.map((user) => (
+                            <li key={user.id}>
+                                <Link href={`/profile/${user.id}`}>
+                                    {user.name}
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </div>
-        </div>
+        </main>
+        
     )
 }
 

@@ -15,3 +15,11 @@ export async function getPost(id: any) {
         post
     });
 }
+
+export async function getUserPosts(id: any) {
+    const posts = data.filter(x => id === x.userId.toString());
+
+    return NextResponse.json({
+        posts
+    });
+}
