@@ -1,0 +1,12 @@
+[
+    {
+        "id": 1,
+        "Name": "Programming and Tech",
+        "Description": "We love programming and tech!"
+    },
+    {
+        "id": 2,
+        "Name": "Health & Fitness",
+        "Description": "We love health and fitness!"
+    }
+]

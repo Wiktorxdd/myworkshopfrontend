@@ -59,15 +59,15 @@ export default function Home() {
                 <header className="bg-blue-600 text-white p-4 text-center text-2xl font-bold">
                     The Main Page
                 </header>
-                <main className="flex-grow flex items-center justify-center p-12">
-                    <ul className="flex flex-col space-y-6">
+                <main className="grid grid-cols-3 divide-x-4 divide-gray-100">
+                    <div></div>
+                    <ul className="flex flex-col space-y-10 mt-10">
                         {posts.map((post: any) => (
                             <PostItem key={post.id} post={post} handleClick={handleClick} likes={likes} />
                         ))}
                     </ul>
-                </main>
-                <div className=""><NewPost /></div>
-          
+                    <div></div>
+                </main>     
             </div>
         </Suspense>
     );

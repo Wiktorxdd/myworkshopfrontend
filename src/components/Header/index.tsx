@@ -9,7 +9,7 @@ export default function Header(props: any) {
         <Link href="/mainpage">
             <div className="absolute inset-y-7 left-20">MyWorkshop</div>
         </Link>
-        <div className="absolute inset-y-5 right-20 w-16"><Menu /></div>
+        <div className="absolute inset-y-5 right-20 flex"><Menu /></div>
 
     </header>;
 }   

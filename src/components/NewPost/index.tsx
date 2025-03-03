@@ -1,3 +1,5 @@
+'use client'
+
 import NewPostIcon from "@/components/svgs/newpost"
 import React, { useState, useEffect, useCallback } from "react";
 

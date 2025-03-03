@@ -3,12 +3,14 @@
         "id": 1,
         "name": "John Doe",
         "email": "johndoe@email.com",
+        "description": "Lorem ipsum dolor sit amet consectetur adipiscing elit. ...",
         "password": "password123"
     },
     {
         "id": 2,
         "name": "Jane Smith",
         "email": "janesmith@email.com",
+        "description": "Lorem ipsum dolor sit amet consectetur adipiscing elit",
         "password": "password12345"
     }
 ]

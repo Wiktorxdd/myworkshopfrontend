@@ -28,7 +28,7 @@ export default function Login() {
             const data = await response.json()
             localStorage.setItem('token', data.token)
 
-            console.log(data)
+            console.log(data.token)
             router.push(`/mainpage`)
         }
     }

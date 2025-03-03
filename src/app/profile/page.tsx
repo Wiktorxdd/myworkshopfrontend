@@ -1,48 +1,38 @@
 'use client'
-
-import Link from "next/link";
-import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react";
-import { usersGet } from "../api/users/route";
+import Link from "next/link";
+import { usersGet, getCurrentUser } from "../api/users/route";
 import SideBar from "@/components/sidebar";
 
 export default function Profile() {
-    const router = useRouter();
-
-    const [users, setUsers] = useState([]);
+    const [user, setUser] = useState(null);
 
     useEffect(() => {
-        const fetchUsers = async () => {
+
+        const fetchCurrentUser = async () => {
             try {
-                const response = await usersGet();
-                const users = await response.json();
-                setUsers(users.userdata);
+                const fetchedUser = await getCurrentUser();
+                setUser(fetchedUser);
             } catch (error) {
-                console.error("Failed to fetch posts:", error);
+                console.error("Failed to fetch current user:", error);
             }
         };
-        fetchUsers();
+        fetchCurrentUser();
     }, []);
 
-    console.log(router);
     return (
         <main>
             <div className="flex flex-col items-center justify-center">
-                <h1>List of Profiles</h1>
-                <div >
-                    <ul className="p-10">
-                        {users.map((user) => (
-                            <li key={user.id}>
-                                <Link href={`/profile/${user.id}`}>
-                                    {user.name}
-                                </Link>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
+                {user ? (
+                    <div>
+                        <h1>{user.name}</h1>
+                        <p className="mt-2">About me!</p>
+                        <p>{user.description}</p>
+                    </div>
+                ) : (
+                    <p>Loading...</p>
+                )}
             </div>
         </main>
-        
-    )
+    );
 }
-
