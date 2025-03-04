@@ -30,6 +30,8 @@ export default function Login() {
 
             console.log(data.token)
             router.push(`/mainpage`)
+            router.refresh()
+
         }
     }
 

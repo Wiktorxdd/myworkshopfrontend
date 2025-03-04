@@ -22,6 +22,7 @@ export default function Profile() {
 
     return (
         <main>
+            <SideBar />
             <div className="flex flex-col items-center justify-center">
                 {user ? (
                     <div>

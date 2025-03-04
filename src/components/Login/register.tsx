@@ -14,30 +14,28 @@ export default function Register() {
         const password = formData.get("password")
         const password_confirmation = formData.get("password_confirmation")
 
-        // if (password !== password_confirmation) {
-        //     alert('Password does not match')
-        // }
-        // else {
-           
-        // }
-        const response = await fetch('http://localhost/api/sign-up', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*'
-            },
-            body: JSON.stringify({
-                name,
-                email,
-                password,
-                password_confirmation
-            }),
-        })
-        if (response.ok) {
-            console.log(response)
-            alert(response.body)
-
-        } 
+        if (password !== password_confirmation) {
+            alert('Password does not match')
+        }
+        else {
+            const response = await fetch('http://localhost:80/api/sign-up', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name,
+                    email,
+                    password,
+                    password_confirmation
+                }),
+            })
+            if (response.ok) {
+                console.log(response)
+                router.push(`/`)
+            }
+        }
+        
     }
 
     return (
