@@ -3,9 +3,11 @@
 import { useParams, useRouter } from "next/navigation"
 import { Suspense, useState, useEffect, useCallback } from "react";
 import { use } from "react";
-import { getUserPosts } from "@/app/api/posts/route";
+import { getUserPosts, deletePost } from "@/app/api/posts/route";
 import LikeIcon from "@/components/svgs/like";
 import CommentIcon from "@/components/svgs/comment";
+import EditIcon from "@/components/svgs/edit";
+import DeleteIcon from "@/components/svgs/delete";
 import Link from "next/link";
 import React from "react";
 import SideBar from "@/components/sidebar";
@@ -14,8 +16,8 @@ import SideBar from "@/components/sidebar";
 const PostItem = React.memo(({ post, handleClick, likes }) => (
     <li className="border bg-neutral-100 shadow-lg rounded-md p-5 m-5">
         <div>
-            <Link className="underline text-blue-600" href={`/profile/${post.userId}`}>
-                {post.author}
+            <Link className="underline text-blue-600" href={`/profile/${post.user_id}`}>
+                {post.user_id}
             </Link>
         </div>
         <Link className="block mt-2 text-xl font-bold" href={`/post/${post.id}`}>
@@ -36,6 +38,7 @@ const PostItem = React.memo(({ post, handleClick, likes }) => (
 ));
 
 export default function ProfileID() {
+    const router = useRouter();
     const unwrappedParams = useParams();
     const { id } = unwrappedParams;
     const [likes, setLikes] = useState(0);
@@ -48,9 +51,8 @@ export default function ProfileID() {
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const response = await getUserPosts(id);
-                const posts = await response.json();
-                setPosts(posts.posts);
+                const posts = await getUserPosts(id);
+                setPosts(posts);
             } catch (error) {
                 console.error("Failed to fetch posts:", error);
             }
@@ -58,16 +60,20 @@ export default function ProfileID() {
         fetchPosts();
     }, []);
 
-
     return (
         <div className="flex ">
-            <SideBar/>
+            <SideBar />
             <div className="flex-grow flex items-center justify-center p-12">
-                <ul className="flex flex-col space-y-6">
-                    {posts.map((post: any) => (
-                        <PostItem key={post.id} post={post} handleClick={handleClick} likes={likes} />
-                    ))}
-                </ul>
+                {posts.data ? (
+                    <ul className="flex flex-col space-y-6">
+                        {posts.data.map((post: any) => (
+                            <PostItem key={post.id} post={post} handleClick={handleClick} likes={likes} />
+                        ))}
+                    </ul>
+                ) : (
+                    <p>Loading...</p>
+                )
+                }
             </div>
         </div>
     )
