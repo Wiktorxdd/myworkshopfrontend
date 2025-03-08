@@ -10,10 +10,10 @@ export default function NewPost() {
     const router = useRouter();
 
     const toggleButton = () => {
-        
+
 
         setShowButton(!ShowButton);
-        
+
     }
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {

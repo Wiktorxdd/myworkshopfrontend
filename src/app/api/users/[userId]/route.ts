@@ -41,3 +41,20 @@ export async function EditUser(id: any, name: string, email: string, password: s
     const data = await response.json();
     return data;
 }
+
+export async function Deleteuser(id: any ){
+    const token = localStorage.getItem('token');
+    const response = await fetch(`http://localhost/api/user/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error(`HTTP error! Status: ${response.status}`);
+    }
+
+    const data = await response.json();
+    return data;
+}

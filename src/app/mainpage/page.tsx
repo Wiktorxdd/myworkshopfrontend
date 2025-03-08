@@ -33,12 +33,6 @@ const PostItem = React.memo(({ post, handleClick, likes, currentUser, handleDele
                 <span>Comment</span>
             </button>
             {post.user_id == currentUser && (
-                <button className="flex items-center space-x-2 text-yellow-500 hover:text-yellow-700">
-                    <EditIcon />
-                    <span>Edit</span>
-                </button>
-            )}
-            {post.user_id == currentUser && (
                 <button className="flex items-center space-x-2 text-red-800 " onClick={() => handleDelete(post.id)}>
                     <DeleteIcon />
                     <span>Delete</span>
