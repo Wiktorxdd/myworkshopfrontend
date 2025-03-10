@@ -1,37 +1,38 @@
 'use client';
 
 import { Suspense, useState, useEffect, useCallback } from "react";
-import { getPosts, deletePost } from "@/app/api/posts/route";
-import { getCurrentUser } from "@/app/api/users/route";
+import { getPosts, deletePost, getPostLikes, likePost, unlikePost, getPostComments } from "@/app/api/posts/route";
+import { getUserId } from "../api/users/[userId]/route";
 import LikeIcon from "@/components/svgs/like";
 import CommentIcon from "@/components/svgs/comment";
-import EditIcon from "@/components/svgs/edit";
 import DeleteIcon from "@/components/svgs/delete";
 import Link from "next/link";
 import React from "react";
 import { useRouter } from "next/navigation";
 import NewPost from "@/components/NewPost";
+import { formatDate } from "@/utils/date";
 
-const PostItem = React.memo(({ post, handleClick, likes, currentUser, handleDelete }) => (
+const PostItem = React.memo(({ post, name, handleClick, likes, currentUser, handleDelete, commentCount }) => (
     <li className="border bg-neutral-100 shadow-lg rounded-md p-5 m-5">
-        <div>
+        <div className="flex justify-between">
             <Link className="underline text-blue-600" href={`/profile/${post.user_id}`}>
-                {post.user_id}
+                {name}
             </Link>
+            <p className="break-word">{formatDate(post.created_at)}</p>
         </div>
         <Link className="block mt-2 text-xl font-bold" href={`/post/${post.id}`}>
             {post.title}
         </Link>
         <p className="mt-2 text-gray-700 break-words line-clamp-2">{post.content}</p>
         <div className="mt-4 flex items-center space-x-5">
-            <button onClick={handleClick} className="flex items-center space-x-2 text-red-600 hover:text-red-800">
+            <button onClick={() => handleClick(post.id)} className="flex items-center space-x-2 text-red-600 hover:text-red-800">
                 <LikeIcon />
                 <span>{likes}</span>
             </button>
-            <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
+            <Link href={`/post/${post.id}`} className="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
                 <CommentIcon />
-                <span>Comment</span>
-            </button>
+                <span>Comments ({commentCount})</span>
+            </Link>
             {post.user_id == currentUser && (
                 <button className="flex items-center space-x-2 text-red-800 " onClick={() => handleDelete(post.id)}>
                     <DeleteIcon />
@@ -44,33 +45,81 @@ const PostItem = React.memo(({ post, handleClick, likes, currentUser, handleDele
 
 export default function Home() {
     const router = useRouter();
-    const [likes, setLikes] = useState(0);
     const [posts, setPosts] = useState([]);
+    const [userMap, setUserMap] = useState({});
+    const [likesCount, setLikes] = useState({});
+    const [likedPosts, setLikedPosts] = useState({});
+    const [commentCounts, setCommentCounts] = useState({});
     const currentUser = localStorage.getItem('currentUser');
 
-    const handleClick = useCallback(() => {
-        setLikes(likes + 1);
-    }, [likes]);
 
-    const handleDelete = async (id) => {
-        await deletePost(id);
-        setPosts(posts.filter(posts => posts.id !== id));
-        router.refresh();
-    };
-
-    
 
     useEffect(() => {
         const fetchPosts = async () => {
             try {
-                const posts = await getPosts();
-                setPosts(posts.data);
+                const postsData = await getPosts();
+                const fetchedPosts = postsData.data;
+                setPosts(fetchedPosts);
+
+                const userIds = [...new Set(fetchedPosts.map(post => post.user_id))];
+                const userPromises = userIds.map(id =>
+                    getUserId(id).catch(error => {
+                        console.error(`Failed to fetch user ${id}:`, error);
+                        return null;
+                    })
+                );
+                const users = await Promise.all(userPromises);
+                const map = {};
+                users.forEach(user => {
+                    if (user) {
+                        map[user.id] = user.name;
+                    }
+                });
+                setUserMap(map);
+
+                const likesPromises = fetchedPosts.map(post => getPostLikes(post.id));
+                const likesResults = await Promise.all(likesPromises);
+                const likesMap = {};
+                fetchedPosts.forEach((post, index) => {
+                    likesMap[post.id] = likesResults[index];
+                });
+                setLikes(likesMap);
+
+                const commentPromises = fetchedPosts.map(post =>
+                    getPostComments(post.id)
+                        .then(comments => comments.total)
+                        .catch(() => 0)
+                );
+                const commentCountsArray = await Promise.all(commentPromises);
+                const commentsMap = {};
+                fetchedPosts.forEach((post, index) => {
+                    commentsMap[post.id] = commentCountsArray[index];
+                });
+                setCommentCounts(commentsMap);
             } catch (error) {
                 console.error("Failed to fetch posts:", error);
             }
         };
         fetchPosts();
     }, []);
+
+    const handleClick = async (id) => {
+        const isLiked = await getPostLikes(id)
+        if (isLiked) {
+            await unlikePost(id);
+        } else {
+            await likePost(id);
+        }
+        setLikedPosts({ ...likedPosts, [id]: !isLiked });
+        const likesCount = await getPostLikes(id);
+        setLikes((prevLikes) => ({ ...prevLikes, [id]: likesCount }));
+    }
+
+    const handleDelete = async (id) => {
+        await deletePost(id);
+        setPosts(posts.filter(posts => posts.id !== id));
+        router.refresh();
+    };
 
     return (
         <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
@@ -82,7 +131,16 @@ export default function Home() {
                     <div></div>
                     <ul className="flex flex-col space-y-10 mb-5">
                         {posts.map((post: any) => (
-                            <PostItem key={post.id} post={post} handleClick={handleClick} likes={likes} currentUser={currentUser} handleDelete={handleDelete}/>
+                            <PostItem
+                                key={post.id}
+                                post={post}
+                                name={userMap[post.user_id] || post.user_id}
+                                handleClick={handleClick}
+                                likes={likesCount[post.id] || 0}
+                                commentCount={commentCounts[post.id] || 0}
+                                currentUser={currentUser}
+                                handleDelete={handleDelete}
+                            />
                         ))}
                     </ul>
                     <div></div>

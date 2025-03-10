@@ -107,3 +107,96 @@ export async function editPost(id: any, title: string, content: string) {
     const data = await response.json();
     return data;
 }
+
+export async function likePost(id: any) {
+    const response = await fetch(`http://localhost:80/api/like/${id}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to edit post');
+    }
+
+    const data = await response.json();
+    return data;
+}
+
+export async function unlikePost(id: any ){
+    const response = await fetch(`http://localhost:80/api/like/${id}`, {
+        method: 'DELETE',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to edit post');
+    }
+
+    const data = await response.json();
+    return data;
+}
+
+export async function getPostLikes(id: any) {
+    const response = await fetch(`http://localhost:80/api/like/${id}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to edit post');
+    }
+
+    const data = await response.json();
+    return data;
+}
+
+export async function getUserPostLikes(id: any) {
+
+}
+
+export async function getPostComments(id: any){
+    const response = await fetch(`http://localhost:80/api/comment/${id}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to edit post');
+    }
+
+    const data = await response.json();
+    console.log(data)
+    return data;
+}
+
+export async function createComment(id: any, content: string){
+    const response = await fetch(`http://localhost:80/api/comment/${id}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+            content
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to create post');
+    }
+
+    const data = await response.json();
+    return data;
+}

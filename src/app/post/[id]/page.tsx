@@ -1,18 +1,19 @@
 'use client';
 
-import { getPost, deletePost, editPost } from "@/app/api/posts/route";
+import { getPost, deletePost, editPost, getPostComments, createComment } from "@/app/api/posts/route";
 import { useState, useEffect, useCallback, Suspense, FormEvent } from 'react';
 import { useRouter } from "next/navigation";
 import { use } from "react";
 import LikeIcon from "@/components/svgs/like";
+import { formatDate } from "@/utils/date";
 import CommentIcon from "@/components/svgs/comment";
 import EditIcon from "@/components/svgs/edit";
 import DeleteIcon from "@/components/svgs/delete";
 import Link from "next/link";
 import React from "react";
 
-const PostItem = React.memo(({ post, handleClick, likes, currentUser, handleDelete, toggleEdit }) => (
-    <div className="flex flex-col items-center justify-center h-screen">
+const PostItem = React.memo(({ post, handleClick, likes, currentUser, handleDelete, toggleEdit, toggleComment }) => (
+    <div className="flex flex-col items-center justify-center ">
         <li className="flex flex-col border bg-neutral-100 shadow-lg rounded-md p-5 m-5 w-1/2 h-1/2 text-center">
             <div>
                 <Link className="underline text-blue-600" href={`/profile/${post.userId}`}>
@@ -25,12 +26,12 @@ const PostItem = React.memo(({ post, handleClick, likes, currentUser, handleDele
             <div className="flex-grow overflow-y-auto mt-2">
                 <p className="text-gray-700 break-words">{post.content}</p>
             </div>
-            <div className="mt-auto flex items-center justify-center space-x-5">
+            <div className="mt-5 flex items-center justify-center space-x-5">
                 <button onClick={handleClick} className="flex items-center space-x-2 text-red-600 hover:text-red-800">
                     <LikeIcon />
                     <span>{likes}</span>
                 </button>
-                <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
+                <button onClick={toggleComment} className="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
                     <CommentIcon />
                     <span>Comment</span>
                 </button>
@@ -47,6 +48,37 @@ const PostItem = React.memo(({ post, handleClick, likes, currentUser, handleDele
                     </>
                 )}
             </div>
+            <p className="break-word mt-2">{formatDate(post.created_at)}</p>
+        </li>
+    </div>
+));
+
+const CommentItem = React.memo(({ comment, currentUser, toggleCommentEdit }) => (
+    <div className="flex flex-col items-center justify-center">
+        <li className="mt-5 flex flex-col items-center border bg-neutral-100 shadow-lg rounded-md w-2/5 h-1/2 text-center">
+            <div className="">
+                <Link className="underline text-blue-600" href={`/profile/${comment.userId}`}>
+                    {comment.user_id}
+                </Link>
+            </div>
+            <div className="flex-grow overflow-y-auto mt-2">
+                <p className="text-gray-700 break-words">{comment.content}</p>
+            </div>
+            <div className="mt-5 flex items-center justify-center space-x-5">
+                {comment.user_id == currentUser && (
+                    <>
+                        <button className="flex items-center space-x-2 text-yellow-500 hover:text-yellow-700" onClick={() => toggleCommentEdit()} >
+                            <EditIcon />
+                            <span>Edit</span>
+                        </button>
+                        <button className="flex items-center space-x-2 text-red-800" onClick={() => handleDelete(post.id)}>
+                            <DeleteIcon />
+                            <span>Delete</span>
+                        </button>
+                    </>
+                )}
+            </div>
+            <p className="break-word">{formatDate(comment.created_at)}</p>
         </li>
     </div>
 ));
@@ -57,7 +89,10 @@ export default function PostId({ params }) {
     const unwrappedParams = use(params);
     const { id } = unwrappedParams;
     const [post, setPost] = useState(null);
+    const [comments, setComments] = useState([])
     const [likes, setLikes] = useState(0);
+    const [ShowComment, setShowComment] = useState(false);
+    const [ShowEditComment, setShowEditComment] = useState(false);
     const [showEditPost, setShowEditPost] = useState(false);
     const currentUser = localStorage.getItem('currentUser');
 
@@ -65,9 +100,17 @@ export default function PostId({ params }) {
         const fetchPost = async () => {
             const post = await getPost(id);
             setPost(post.data);
-            console.log(post.data);
+
         };
         fetchPost();
+    }, [id]);
+
+    useEffect(() => {
+        const fetchComments = async () => {
+            const comment = await getPostComments(id)
+            setComments(comment.data)
+        };
+        fetchComments();
     }, [id]);
 
 
@@ -85,6 +128,14 @@ export default function PostId({ params }) {
         setShowEditPost(!showEditPost);
     }
 
+    const toggleComment = () => {
+        setShowComment(!ShowComment);
+    }
+
+    const toggleCommentEdit = () => {
+        setShowEditComment(!ShowEditComment);
+    }
+
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
@@ -95,8 +146,15 @@ export default function PostId({ params }) {
         setShowEditPost(!showEditPost);
     }
 
-    return (
+    const handleCommentSubmit = async (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget);
+        const content = formData.get("content")
+        await createComment(post.id, content);
+        setShowComment(!ShowComment);
+    }
 
+    return (
         <Suspense fallback={<div className="flex items-center justify-center h-screen">Loading...</div>}>
             {!showEditPost &&
                 <ul>
@@ -106,6 +164,7 @@ export default function PostId({ params }) {
                             handleClick={handleClick}
                             likes={likes}
                             toggleEdit={toggleEdit}
+                            toggleComment={toggleComment}
                             currentUser={currentUser}
                             handleDelete={handleDelete}
                         />
@@ -113,7 +172,7 @@ export default function PostId({ params }) {
                 </ul>
             }
             {showEditPost &&
-                <div className="flex flex-col items-center justify-center h-screen">
+                <div className="flex flex-col items-center justify-center">
                     <form onSubmit={handleSubmit} className="flex flex-col border bg-neutral-100 shadow-lg rounded-md p-5 m-5 w-1/2 h-1/2 text-center">
                         <input type="text" name="title" defaultValue={post.title} className="border rounded-md p-2 m-2" />
                         <textarea type="text" name="content" defaultValue={post.content} className="border rounded-md p-2 m-2" />
@@ -124,6 +183,30 @@ export default function PostId({ params }) {
                     </form>
                 </div>
             }
+            {ShowComment &&
+                <div className="flex flex-col items-center justify-center">
+                    <form onSubmit={handleCommentSubmit} className="flex flex-col border bg-neutral-100 shadow-lg rounded-md text-center p-2 m-2 w-2/5 h-1/2">
+                        <textarea type="text" name="content" placeholder="Comment content" className="border rounded-md" />
+                        <div className="mt-auto flex items-center justify-center space-x-5">
+                            <button className="border rounded-md p-2 m-2 bg-blue-600 text-white">Comment</button>
+                            <button onClick={toggleComment} className="border rounded-md p-2 m-2 bg-blue-600 text-white">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            }
+            <div className="">
+                <ul className="">
+                    <p className="font-bold flex flex-col items-center justify-center">Comments</p>
+                    {comments.map(comment => (
+                        <CommentItem
+                            key={comment.id}
+                            toggleCommentEdit={toggleCommentEdit}
+                            comment={comment}
+                            currentUser={currentUser}
+                        />
+                    ))}
+                </ul>
+            </div>
         </Suspense>
     );
 }
