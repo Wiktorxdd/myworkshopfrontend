@@ -1,3 +1,4 @@
+import { error } from 'console';
 import { NextResponse} from 'next/server'
 
 
@@ -160,7 +161,20 @@ export async function getPostLikes(id: any) {
 }
 
 export async function getUserPostLikes(id: any) {
+    const response = await fetch(`http://localhost:80/api/like/user/${id}`, {
+        method: "GET",
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    });
 
+    if (!response.ok) {
+        throw new Error("Failed to fetch like")
+    }
+
+    const data = await response.json();
+    console.log(data);
+    return data;
 }
 
 export async function getPostComments(id: any){
@@ -195,6 +209,22 @@ export async function createComment(id: any, content: string){
 
     if (!response.ok) {
         throw new Error('Failed to create post');
+    }
+
+    const data = await response.json();
+    return data;
+}
+
+export async function deleteComment(id: any){
+    const response = await fetch(`http://localhost:80/api/comment/${id}`, {
+        method: "DELETE",
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to delete comment');
     }
 
     const data = await response.json();

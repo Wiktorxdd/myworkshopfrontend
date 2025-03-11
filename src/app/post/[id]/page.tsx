@@ -1,6 +1,6 @@
 'use client';
 
-import { getPost, deletePost, editPost, getPostComments, createComment } from "@/app/api/posts/route";
+import { getPost, deletePost, editPost, getPostComments, createComment, deleteComment } from "@/app/api/posts/route";
 import { useState, useEffect, useCallback, Suspense, FormEvent } from 'react';
 import { useRouter } from "next/navigation";
 import { use } from "react";
@@ -53,7 +53,7 @@ const PostItem = React.memo(({ post, handleClick, likes, currentUser, handleDele
     </div>
 ));
 
-const CommentItem = React.memo(({ comment, currentUser, toggleCommentEdit }) => (
+const CommentItem = React.memo(({ comment, currentUser, toggleCommentEdit, handleCommentDelete, ShowEditComment }) => (
     <div className="flex flex-col items-center justify-center">
         <li className="mt-5 flex flex-col items-center border bg-neutral-100 shadow-lg rounded-md w-2/5 h-1/2 text-center">
             <div className="">
@@ -62,7 +62,12 @@ const CommentItem = React.memo(({ comment, currentUser, toggleCommentEdit }) => 
                 </Link>
             </div>
             <div className="flex-grow overflow-y-auto mt-2">
-                <p className="text-gray-700 break-words">{comment.content}</p>
+            {!ShowEditComment && 
+                <p className="text-gray-700 break-words">{comment.content}</p>    
+            }
+            {ShowEditComment &&
+                <textarea></textarea>
+            }
             </div>
             <div className="mt-5 flex items-center justify-center space-x-5">
                 {comment.user_id == currentUser && (
@@ -71,7 +76,7 @@ const CommentItem = React.memo(({ comment, currentUser, toggleCommentEdit }) => 
                             <EditIcon />
                             <span>Edit</span>
                         </button>
-                        <button className="flex items-center space-x-2 text-red-800" onClick={() => handleDelete(post.id)}>
+                        <button className="flex items-center space-x-2 text-red-800" onClick={() => handleCommentDelete(comment.id)}>
                             <DeleteIcon />
                             <span>Delete</span>
                         </button>
@@ -84,7 +89,6 @@ const CommentItem = React.memo(({ comment, currentUser, toggleCommentEdit }) => 
 ));
 
 export default function PostId({ params }) {
-    console.log(params);
     const router = useRouter();
     const unwrappedParams = use(params);
     const { id } = unwrappedParams;
@@ -151,7 +155,15 @@ export default function PostId({ params }) {
         const formData = new FormData(event.currentTarget);
         const content = formData.get("content")
         await createComment(post.id, content);
+        const comment = await getPostComments(id)
+        setComments(comment.data)
         setShowComment(!ShowComment);
+    }
+
+    const handleCommentDelete = async (id) => {
+        await deleteComment(id);
+        setComments(comments.filter(comments => comments.id !== id));
+        router.refresh();
     }
 
     return (
@@ -201,6 +213,8 @@ export default function PostId({ params }) {
                         <CommentItem
                             key={comment.id}
                             toggleCommentEdit={toggleCommentEdit}
+                            handleCommentDelete={handleCommentDelete}
+                            ShowEditComment={ShowEditComment}
                             comment={comment}
                             currentUser={currentUser}
                         />

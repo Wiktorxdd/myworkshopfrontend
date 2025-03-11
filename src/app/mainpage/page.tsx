@@ -1,7 +1,7 @@
 'use client';
 
 import { Suspense, useState, useEffect, useCallback } from "react";
-import { getPosts, deletePost, getPostLikes, likePost, unlikePost, getPostComments } from "@/app/api/posts/route";
+import { getPosts, deletePost, getPostLikes, likePost, unlikePost, getPostComments, getUserPostLikes } from "@/app/api/posts/route";
 import { getUserId } from "../api/users/[userId]/route";
 import LikeIcon from "@/components/svgs/like";
 import CommentIcon from "@/components/svgs/comment";
@@ -104,12 +104,13 @@ export default function Home() {
     }, []);
 
     const handleClick = async (id) => {
-        const isLiked = await getPostLikes(id)
-        if (isLiked) {
+        const isLiked = await getUserPostLikes(id)
+        if (isLiked.status) {
             await unlikePost(id);
         } else {
             await likePost(id);
         }
+
         setLikedPosts({ ...likedPosts, [id]: !isLiked });
         const likesCount = await getPostLikes(id);
         setLikes((prevLikes) => ({ ...prevLikes, [id]: likesCount }));
