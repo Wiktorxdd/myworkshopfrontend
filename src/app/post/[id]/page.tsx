@@ -10,9 +10,11 @@ import CommentIcon from "@/components/svgs/comment";
 import EditIcon from "@/components/svgs/edit";
 import DeleteIcon from "@/components/svgs/delete";
 import Link from "next/link";
+import { Base64Decoder } from 'next-base64-encoder'
+import Image from "next/image";
 import React from "react";
 
-const PostItem = React.memo(({ post, handleClick, likes, currentUser, handleDelete, toggleEdit, toggleComment }) => (
+const PostItem = React.memo(({ post, handleClick, likes, currentUser, handleDelete, toggleEdit, toggleComment, image }) => (
     <div className="flex flex-col items-center justify-center ">
         <li className="flex flex-col border bg-neutral-100 shadow-lg rounded-md p-5 m-5 w-1/2 h-1/2 text-center">
             <div>
@@ -25,6 +27,12 @@ const PostItem = React.memo(({ post, handleClick, likes, currentUser, handleDele
             </div>
             <div className="flex-grow overflow-y-auto mt-2">
                 <p className="text-gray-700 break-words">{post.content}</p>
+                <Image
+                    src={image}
+                    width={100}
+                    height={100}
+                    alt="image"
+                />
             </div>
             <div className="mt-5 flex items-center justify-center space-x-5">
                 <button onClick={handleClick} className="flex items-center space-x-2 text-red-600 hover:text-red-800">
@@ -97,14 +105,18 @@ export default function PostId({ params }) {
     const [likes, setLikes] = useState(0);
     const [ShowComment, setShowComment] = useState(false);
     const [ShowEditComment, setShowEditComment] = useState(false);
+    const [image, setImage] = useState();
     const [showEditPost, setShowEditPost] = useState(false);
     const currentUser = localStorage.getItem('currentUser');
+    const base64Decoder = new Base64Decoder();
 
     useEffect(() => {
         const fetchPost = async () => {
             const post = await getPost(id);
             setPost(post.data);
-
+            const image = base64Decoder.decode(post.data.image);
+            setImage(post.data.image);
+            console.log(image);
         };
         fetchPost();
     }, [id]);
@@ -175,6 +187,7 @@ export default function PostId({ params }) {
                             post={post}
                             handleClick={handleClick}
                             likes={likes}
+                            image={image}
                             toggleEdit={toggleEdit}
                             toggleComment={toggleComment}
                             currentUser={currentUser}

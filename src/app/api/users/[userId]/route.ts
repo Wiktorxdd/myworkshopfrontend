@@ -18,7 +18,7 @@ export async function getUserId(id: any) {
     return user;
 }
 
-export async function EditUser(id: any, name: string, email: string, password: string, password_confirmation: string) {
+export async function EditUser(id: any, name: string, about_me: string, email: string, password: string, password_confirmation: string) {
     const token = localStorage.getItem('token');
     const response = await fetch(`http://localhost/api/user/${id}`, {
         method: 'PATCH',
@@ -28,6 +28,7 @@ export async function EditUser(id: any, name: string, email: string, password: s
         },
         body: JSON.stringify({
             name,
+            about_me,
             email,
             password,
             password_confirmation

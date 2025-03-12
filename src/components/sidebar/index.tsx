@@ -66,8 +66,8 @@ export default function SideBar() {
                     {user ? (
                         <div>
                             <h1>{user.name}</h1>
-                            <p className="mt-2">About me!</p>
-                            <p>{user.description}</p>
+                            <p className="mt-2 break-words">About me!</p>
+                            <p className=''>{user.about_me}</p>
                         </div>
                     ) : (
                         <p>Loading...</p>

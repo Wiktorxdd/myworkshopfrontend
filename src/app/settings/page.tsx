@@ -25,6 +25,7 @@ export default function SettingsPage() {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
         const name = formData.get("name") as string;
+        const about_me = formData.get("aboutme") as string;
         const email = formData.get("email") as string;
         const password = formData.get("password") as string;
         const password_confirmation = formData.get("password_confirmation") as string;
@@ -36,7 +37,7 @@ export default function SettingsPage() {
 
         try {
             const userId = currentUser;
-            const response = await EditUser(userId, name, email, password, password_confirmation);
+            const response = await EditUser(userId, name, about_me, email, password, password_confirmation);
             console.log(response);
             router.push(`/profile`);
         } catch (error) {
@@ -69,6 +70,22 @@ export default function SettingsPage() {
                                     type="text"
                                     name="name"
                                     placeholder="Enter your name"
+
+                                />
+                            </div>
+                            <label 
+                                className="mb-3 mt-5 block text-xs font-medium text-gray-900"
+                                htmlFor="aboutme"
+                                >
+                                About me
+                            </label>
+                            <div className="relative">
+                                <textarea
+                                    className="peer block w-full rounded-md border border-neutral-100 bg-neutral-100 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-600"
+                                    id="aboutme"
+                                    type="text"
+                                    name="aboutme"
+                                    placeholder="Write something about yourself"
 
                                 />
                             </div>
