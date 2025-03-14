@@ -4,7 +4,7 @@ export const formatDate = (dateString) => {
       return "Unknown date";
     }
     return new Intl.DateTimeFormat(undefined, {
-      dateStyle: "medium", // e.g., "Oct 5, 2023"
-      timeStyle: "medium"  // e.g., "2:48:00 PM"
-    }).format(date); // Output: "Oct 5, 2023, 2:48:00 PM"
+      dateStyle: "medium", // "mar 5, 2025"
+      timeStyle: "short"  // "08:48 "
+    }).format(date); // "mar 5, 2025, 08:48"
   };

@@ -1,6 +1,6 @@
 'use client';
 
-import { getPost, deletePost, editPost, getPostComments, createComment, getPostLikes, editComment, unlikePost, likePost } from "@/app/api/posts/route";
+import { getPost, deletePost, editPost, getPostComments, createComment, deleteComment, getPostLikes, editComment, unlikePost, likePost } from "@/app/api/posts/route";
 import { useState, useEffect, useCallback, Suspense, FormEvent } from 'react';
 import { useRouter } from "next/navigation";
 import { use } from "react";
@@ -10,10 +10,12 @@ import CommentIcon from "@/components/svgs/comment";
 import EditIcon from "@/components/svgs/edit";
 import DeleteIcon from "@/components/svgs/delete";
 import Link from "next/link";
+import { Base64Decoder } from 'next-base64-encoder'
+import Image from "next/image";
 import React from "react";
 import { getUserId } from "@/app/api/users/[userId]/route";
 
-const PostItem = React.memo(({ post, handleClick, likes, currentUser, handleDelete, toggleEdit, toggleComment, user }) => (
+const PostItem = React.memo(({ post, handleClick, likes, currentUser, handleDelete, toggleEdit, toggleComment, image, user }) => (
     <div className="flex flex-col items-center justify-center ">
         <li className="flex flex-col border bg-neutral-100 shadow-lg rounded-md p-5 m-5 w-1/2 h-1/2 text-center">
             <div>
@@ -26,6 +28,12 @@ const PostItem = React.memo(({ post, handleClick, likes, currentUser, handleDele
             </div>
             <div className="flex-grow overflow-y-auto mt-2">
                 <p className="text-gray-700 break-words">{post.content}</p>
+                <Image
+                    src={image}
+                    width={100}
+                    height={100}
+                    alt="image"
+                />
             </div>
             <div className="mt-5 flex items-center justify-center space-x-5">
                 <button onClick={() => handleClick(post.id)}className="flex items-center space-x-2 text-red-600 hover:text-red-800">
@@ -54,7 +62,7 @@ const PostItem = React.memo(({ post, handleClick, likes, currentUser, handleDele
     </div>
 ));
 
-const CommentItem = React.memo(({ comment, currentUser, toggleCommentEdit, name }) => (
+const CommentItem = React.memo(({ comment, currentUser, toggleCommentEdit, handleCommentDelete, ShowEditComment, name }) => (
     <div className="flex flex-col items-center justify-center">
         <li className="mt-5 flex flex-col items-center border bg-neutral-100 shadow-lg rounded-md w-2/5 h-1/2 text-center">
             <div className="">
@@ -63,7 +71,12 @@ const CommentItem = React.memo(({ comment, currentUser, toggleCommentEdit, name 
                 </Link>
             </div>
             <div className="flex-grow overflow-y-auto mt-2">
-                <p className="text-gray-700 break-words">{comment.content}</p>
+            {!ShowEditComment && 
+                <p className="text-gray-700 break-words">{comment.content}</p>    
+            }
+            {ShowEditComment &&
+                <textarea></textarea>
+            }
             </div>
             <div className="mt-5 flex items-center justify-center space-x-5">
                 {comment.user_id == currentUser && (
@@ -72,7 +85,7 @@ const CommentItem = React.memo(({ comment, currentUser, toggleCommentEdit, name 
                             <EditIcon />
                             <span>Edit</span>
                         </button>
-                        <button className="flex items-center space-x-2 text-red-800" onClick={() => handleDelete(post.id)}>
+                        <button className="flex items-center space-x-2 text-red-800" onClick={() => handleCommentDelete(comment.id)}>
                             <DeleteIcon />
                             <span>Delete</span>
                         </button>
@@ -93,11 +106,13 @@ export default function PostId({ params }) {
     const [user, setUser] = useState()
     const [ShowComment, setShowComment] = useState(false);
     const [ShowEditComment, setShowEditComment] = useState(false);
+    const [image, setImage] = useState();
     const [userMap, setUserMap] = useState({});
     const [showEditPost, setShowEditPost] = useState(false);
     const [likesCount, setLikes] = useState({});
     const [likedPosts, setLikedPosts] = useState({});
     const currentUser = localStorage.getItem('currentUser');
+    const base64Decoder = new Base64Decoder();
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -185,7 +200,15 @@ export default function PostId({ params }) {
         const formData = new FormData(event.currentTarget);
         const content = formData.get("content")
         await createComment(post.id, content);
+        const comment = await getPostComments(id)
+        setComments(comment.data)
         setShowComment(!ShowComment);
+    }
+
+    const handleCommentDelete = async (id) => {
+        await deleteComment(id);
+        setComments(comments.filter(comments => comments.id !== id));
+        router.refresh();
     }
 
     return (
@@ -198,6 +221,7 @@ export default function PostId({ params }) {
                             handleClick={handleClick}
                             likes={likesCount[post.id] || 0}
                             user={user}
+                            image={image}
                             toggleEdit={toggleEdit}
                             toggleComment={toggleComment}
                             currentUser={currentUser}
@@ -239,6 +263,8 @@ export default function PostId({ params }) {
                             key={comment.id}
                             name={userMap[comment.user_id] || comment.user_id}
                             toggleCommentEdit={toggleCommentEdit}
+                            handleCommentDelete={handleCommentDelete}
+                            ShowEditComment={ShowEditComment}
                             comment={comment}
                             currentUser={currentUser}
                         />

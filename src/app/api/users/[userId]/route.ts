@@ -18,7 +18,7 @@ export async function getUserId(id: any) {
     return user;
 }
 
-export async function EditUser(id: any, name: string, email: string, password: string, password_confirmation: string) {
+export async function EditUser(id: any, name: string, about_me: string, email: string, password: string, password_confirmation: string) {
     const token = localStorage.getItem('token');
     const response = await fetch(`http://localhost/api/user/${id}`, {
         method: 'PATCH',
@@ -28,6 +28,7 @@ export async function EditUser(id: any, name: string, email: string, password: s
         },
         body: JSON.stringify({
             name,
+            about_me,
             email,
             password,
             password_confirmation
@@ -58,3 +59,52 @@ export async function Deleteuser(id: any ){
     const data = await response.json();
     return data;
 }
+
+export async function getFollowAmount(id: any){
+    const response = await fetch(`http://localhost:80/api/user/follow/${id}/count`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+
+    if (!response.ok) {
+        throw new Error(`Failed to fetch follows: ${response.status}`);
+    }
+
+    const data = await response.json()
+    return data;
+}
+
+export async function followUser(id: any){
+    const response = await fetch(`http://localhost:80/api/user/follow/${id}`,{
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+
+    if(!response.ok) {
+        throw new Error(`Failed to follow user: ${response.status}`)
+    }
+
+    const data = await response.json()
+    return data;
+}
+
+export async function followsUser(id: any){
+    const response = await fetch(`http://localhost:80/api/user/follow/${id}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+
+    if(!response.ok) {
+        throw new Error(`failed to check for following: ${response.status}`)
+    }
+
+    const data = await response.json()
+    return data;
+}
+

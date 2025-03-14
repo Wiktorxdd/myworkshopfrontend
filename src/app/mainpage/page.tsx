@@ -1,9 +1,10 @@
 'use client';
 
 import { Suspense, useState, useEffect, useCallback } from "react";
-import { getPosts, deletePost, getPostLikes, likePost, unlikePost, getPostComments } from "@/app/api/posts/route";
+import { getPosts, deletePost, getPostLikes, likePost, unlikePost, getPostComments, getUserPostLikes } from "@/app/api/posts/route";
 import { getUserId } from "../api/users/[userId]/route";
 import LikeIcon from "@/components/svgs/like";
+import UnlikeIcon from "@/components/svgs/unlike"
 import CommentIcon from "@/components/svgs/comment";
 import DeleteIcon from "@/components/svgs/delete";
 import Link from "next/link";
@@ -11,8 +12,9 @@ import React from "react";
 import { useRouter } from "next/navigation";
 import NewPost from "@/components/NewPost";
 import { formatDate } from "@/utils/date";
+import { Base64Decoder } from 'next-base64-encoder'
 
-const PostItem = React.memo(({ post, name, handleClick, likes, currentUser, handleDelete, commentCount }) => (
+const PostItem = React.memo(({ post, name, handleClick, likes, currentUser, handleDelete, commentCount, likedPosts }) => (
     <li className="border bg-neutral-100 shadow-lg rounded-md p-5 m-5">
         <div className="flex justify-between">
             <Link className="underline text-blue-600" href={`/profile/${post.user_id}`}>
@@ -25,10 +27,18 @@ const PostItem = React.memo(({ post, name, handleClick, likes, currentUser, hand
         </Link>
         <p className="mt-2 text-gray-700 break-words line-clamp-2">{post.content}</p>
         <div className="mt-4 flex items-center space-x-5">
-            <button onClick={() => handleClick(post.id)} className="flex items-center space-x-2 text-red-600 hover:text-red-800">
-                <LikeIcon />
-                <span>{likes}</span>
-            </button>
+            {likedPosts &&
+                <button onClick={() => handleClick(post.id)} className="flex items-center space-x-2 text-red-600 hover:text-red-800">
+                    <UnlikeIcon />
+                    <span>{likes}</span>
+                </button>
+            }
+            {!likedPosts &&
+                <button onClick={() => handleClick(post.id)} className="flex items-center space-x-2 text-red-600 hover:text-red-800">
+                    <LikeIcon />
+                    <span>{likes}</span>
+                </button>
+            }
             <Link href={`/post/${post.id}`} className="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
                 <CommentIcon />
                 <span>Comments ({commentCount})</span>
@@ -46,13 +56,14 @@ const PostItem = React.memo(({ post, name, handleClick, likes, currentUser, hand
 export default function Home() {
     const router = useRouter();
     const [posts, setPosts] = useState([]);
+    const [image, setImages] = useState([])
     const [userMap, setUserMap] = useState({});
     const [likesCount, setLikes] = useState({});
     const [likedPosts, setLikedPosts] = useState({});
     const [commentCounts, setCommentCounts] = useState({});
     const currentUser = localStorage.getItem('currentUser');
 
-
+    const base64Decoder = new Base64Decoder();
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -60,6 +71,9 @@ export default function Home() {
                 const postsData = await getPosts();
                 const fetchedPosts = postsData.data;
                 setPosts(fetchedPosts);
+                
+                // const image = base64Decoder.decode(fetchedPosts.image)
+                
 
                 const userIds = [...new Set(fetchedPosts.map(post => post.user_id))];
                 const userPromises = userIds.map(id =>
@@ -104,12 +118,13 @@ export default function Home() {
     }, []);
 
     const handleClick = async (id) => {
-        const isLiked = await getPostLikes(id)
-        if (isLiked) {
+        const isLiked = await getUserPostLikes(id)
+        if (isLiked.status) {
             await unlikePost(id);
         } else {
             await likePost(id);
         }
+
         setLikedPosts({ ...likedPosts, [id]: !isLiked });
         const likesCount = await getPostLikes(id);
         setLikes((prevLikes) => ({ ...prevLikes, [id]: likesCount }));
@@ -137,6 +152,7 @@ export default function Home() {
                                 name={userMap[post.user_id] || post.user_id}
                                 handleClick={handleClick}
                                 likes={likesCount[post.id] || 0}
+                                likedPosts={likedPosts}
                                 commentCount={commentCounts[post.id] || 0}
                                 currentUser={currentUser}
                                 handleDelete={handleDelete}
