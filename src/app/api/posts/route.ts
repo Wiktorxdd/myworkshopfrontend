@@ -200,3 +200,23 @@ export async function createComment(id: any, content: string){
     const data = await response.json();
     return data;
 }
+
+export async function editComment(id: any, content: string) {
+    const response = await fetch(`http://localhost:80/api/comment/${id}`, {
+        method: 'PATCH',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+            content
+        })
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to create post');
+    }
+
+    const data = await response.json();
+    return data;
+}

@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation"
 import { Suspense, useState, useEffect, useCallback } from "react";
 import { use } from "react";
-import { getUserPosts, deletePost } from "@/app/api/posts/route";
+import { getUserPosts, deletePost, getPostLikes, getPostComments, likePost, unlikePost } from "@/app/api/posts/route";
 import { getUserId } from "@/app/api/users/[userId]/route";
 import LikeIcon from "@/components/svgs/like";
 import CommentIcon from "@/components/svgs/comment";
@@ -30,10 +30,10 @@ const PostItem = React.memo(({ post, handleClick, likes, name }) => (
                 <LikeIcon />
                 <span>{likes}</span>
             </button>
-            <button className="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
+            <Link href={`/post/${post.id}`} className="flex items-center space-x-2 text-blue-600 hover:text-blue-800">
                 <CommentIcon />
                 <span>Comment</span>
-            </button>
+            </Link>
         </div>
     </li>
 ));
@@ -42,14 +42,24 @@ export default function ProfileID() {
     const router = useRouter();
     const unwrappedParams = useParams();
     const { id } = unwrappedParams;
-    const [likes, setLikes] = useState(0);
+    const [likes, setLikes] = useState({});
+    const [likedPosts, setLikedPosts] = useState({});
+    const [commentCounts, setCommentCounts] = useState({});
     const [posts, setPosts] = useState([]);
     const [userMap, setUserMap] = useState({});
-    
 
-    const handleClick = useCallback(() => {
-        setLikes(likes + 1);
-    }, [likes]);
+
+    const handleClick = async (id) => {
+        const isLiked = await getPostLikes(id)
+        if (isLiked) {
+            await unlikePost(id);
+        } else {
+            await likePost(id);
+        }
+        setLikedPosts({ ...likedPosts, [id]: !isLiked });
+        const likesCount = await getPostLikes(id);
+        setLikes((prevLikes) => ({ ...prevLikes, [id]: likesCount }));
+    }
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -76,6 +86,27 @@ export default function ProfileID() {
                 });
                 setUserMap(map);
 
+                const likesPromises = fetchedPosts.map(post => getPostLikes(post.id));
+                const likesResults = await Promise.all(likesPromises);
+                const likesMap = {};
+                fetchedPosts.forEach((post, index) => {
+                    likesMap[post.id] = likesResults[index];
+                });
+                console.log(likesMap)
+                setLikes(likesMap);
+
+                const commentPromises = fetchedPosts.map(post =>
+                    getPostComments(post.id)
+                        .then(comments => comments.total)
+                        .catch(() => 0)
+                );
+                const commentCountsArray = await Promise.all(commentPromises);
+                const commentsMap = {};
+                fetchedPosts.forEach((post, index) => {
+                    commentsMap[post.id] = commentCountsArray[index];
+                });
+                setCommentCounts(commentsMap);
+
             } catch (error) {
                 console.error("Failed to fetch posts:", error);
             }
@@ -90,7 +121,7 @@ export default function ProfileID() {
                 {posts ? (
                     <ul className="flex flex-col space-y-6">
                         {posts.map((post: any) => (
-                            <PostItem key={post.id} post={post} handleClick={handleClick} likes={likes} name={userMap[post.user_id] || post.user_id} />
+                            <PostItem key={post.id} post={post} handleClick={handleClick} likes={likes[post.id] || 0} name={userMap[post.user_id] || post.user_id} />
                         ))}
                     </ul>
                 ) : (
