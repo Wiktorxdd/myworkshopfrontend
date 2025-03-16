@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import communitydata from '@/communitydata.json';
 
-export async function getGroups() {
-    const response = await fetch(`http://localhost:80/api/group?perPage=10&page=1`, {
+export async function getGroups(page = 1) {
+    const response = await fetch(`http://localhost:80/api/group?perPage=10&page=${page}`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -15,7 +15,6 @@ export async function getGroups() {
 
     const data = await response.json();
 
-    console.log(data);
     return data;
 }
 
@@ -36,22 +35,17 @@ export async function getGroupById(id: any) {
     return data;
 }
 
-export async function createGroup(catId: any, name: string, description: string) {
+export async function createGroup(formData: FormData) {
     const response = await fetch(`http://localhost:80/api/group`, {
         method: 'POST',
         headers: {
             'Authorization': `bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-            catId,
-            name,
-            description
-        })
+        body: formData
     })
 
     if (!response.ok) {
-        throw new Error("failed to create group")
+        throw new Error(`failed to create group: ${response.statusText}`)
     }
 
     const data = await response.json();
@@ -74,18 +68,13 @@ export async function deleteGroup(id: any) {
     return data;
 }
 
-export async function updateGroup(id: any, catId: any, name: string, description: string) {
-    const response = await fetch(`http://localhost:80/api/group/${id}`, {
-        method: 'PATCH',
+export async function updateGroup(formData: FormData, id: any) {
+    const response = await fetch(`http://localhost:80/api/group/${id}?_method=patch`, {
+        method: 'POST',
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-            catId,
-            name,
-            description
-        })
+        body: formData
     })
 
     if (!response.ok) {
@@ -93,5 +82,53 @@ export async function updateGroup(id: any, catId: any, name: string, description
     }
 
     const data = await response.json();
+    return data;
+}
+
+export async function getGroupMembers(id: any) {
+    const response = await fetch(`http://localhost:80/api/group/follow/${id}/count`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+
+    if (!response.ok) {
+        throw new Error("failed to fetch group members")
+    }
+
+    const data = await response.json();
+    return data;
+}
+
+export async function followGroup(id:any) {
+    const response = await fetch(`http://localhost:80/api/group/follow/${id}`, {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+
+    if(!response.ok) {
+        throw new Error("failed to follow group")
+    }
+
+    const data = await response.json()
+    return data;
+}
+
+export async function isFollowingGroup(id:any) {
+    const response = await fetch(`http://localhost:80/api/group/follow/${id}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+
+    if(!response.ok) {
+        throw new Error("failed to follow group")
+    }
+
+    const data = await response.json()
     return data;
 }

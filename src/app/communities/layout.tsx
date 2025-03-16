@@ -2,7 +2,7 @@ import Header from "@/components/Header";
 import "../mainpage.css";
 import NewPost from "@/components/NewPost";
 
-export default function HomeLayout({ 
+export default function CommunityLayout({ 
     children
 }: {
     children: React.ReactNode;

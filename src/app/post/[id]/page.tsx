@@ -10,7 +10,6 @@ import CommentIcon from "@/components/svgs/comment";
 import EditIcon from "@/components/svgs/edit";
 import DeleteIcon from "@/components/svgs/delete";
 import Link from "next/link";
-import { Base64Decoder } from 'next-base64-encoder'
 import Image from "next/image";
 import React from "react";
 import { getUserId } from "@/app/api/users/[userId]/route";
@@ -28,15 +27,19 @@ const PostItem = React.memo(({ post, handleClick, likes, currentUser, handleDele
             </div>
             <div className="flex-grow overflow-y-auto mt-2">
                 <p className="text-gray-700 break-words">{post.content}</p>
-                <Image
-                    src={image}
-                    width={100}
-                    height={100}
-                    alt="image"
-                />
+            </div>
+            <div className="flex justify-center">
+                {image &&
+                    <Image className=""
+                        src={image}
+                        width={250}
+                        height={250}
+                        alt="image"
+                    />
+                }
             </div>
             <div className="mt-5 flex items-center justify-center space-x-5">
-                <button onClick={() => handleClick(post.id)}className="flex items-center space-x-2 text-red-600 hover:text-red-800">
+                <button onClick={() => handleClick(post.id)} className="flex items-center space-x-2 text-red-600 hover:text-red-800">
                     <LikeIcon />
                     <span>{likes}</span>
                 </button>
@@ -71,12 +74,12 @@ const CommentItem = React.memo(({ comment, currentUser, toggleCommentEdit, handl
                 </Link>
             </div>
             <div className="flex-grow overflow-y-auto mt-2">
-            {!ShowEditComment && 
-                <p className="text-gray-700 break-words">{comment.content}</p>    
-            }
-            {ShowEditComment &&
-                <textarea></textarea>
-            }
+                {!ShowEditComment &&
+                    <p className="text-gray-700 break-words">{comment.content}</p>
+                }
+                {ShowEditComment &&
+                    <textarea></textarea>
+                }
             </div>
             <div className="mt-5 flex items-center justify-center space-x-5">
                 {comment.user_id == currentUser && (
@@ -106,18 +109,24 @@ export default function PostId({ params }) {
     const [user, setUser] = useState()
     const [ShowComment, setShowComment] = useState(false);
     const [ShowEditComment, setShowEditComment] = useState(false);
-    const [image, setImage] = useState();
+    const [image, setImage] = useState(null);
     const [userMap, setUserMap] = useState({});
     const [showEditPost, setShowEditPost] = useState(false);
     const [likesCount, setLikes] = useState({});
     const [likedPosts, setLikedPosts] = useState({});
     const currentUser = localStorage.getItem('currentUser');
-    const base64Decoder = new Base64Decoder();
 
     useEffect(() => {
         const fetchPost = async () => {
             const post = await getPost(id);
             setPost(post.data);
+
+            if (post.data.image.base64_data) {
+                const base64String = post.data.image.base64_data;
+                const dataUrl = `data:image/jpeg;base64,${base64String}`;
+                setImage(dataUrl);
+            }
+
             const user = await getUserId(post.data.user_id);
             setUser(user.name);
 
@@ -154,9 +163,9 @@ export default function PostId({ params }) {
     }, [id]);
 
 
+
     const handleClick = async (id) => {
         const isLiked = await getPostLikes(id)
-        console.log(`LIKED: ${isLiked}`)
         if (isLiked) {
             await unlikePost(id);
         } else {
@@ -168,8 +177,15 @@ export default function PostId({ params }) {
     }
 
     const handleDelete = async (id) => {
-        await deletePost(id);
-        router.push('/profile')
+        if (confirm("Are you sure you want to delete this post?")) {
+            try {
+                await deletePost(id);
+                router.push('/profile')
+            } catch (error) {
+                console.error('Error deleting post:', error);
+                alert('Failed to delete post. Please try again.');
+            }
+        }
 
     };
 
@@ -188,10 +204,9 @@ export default function PostId({ params }) {
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
-        const title = formData.get("title")
-        const content = formData.get("content")
-        await editPost(post.id, title, content);
-        setPost({ ...post, title, content });
+        await editPost(formData, post.id);
+        const updatedData = Object.fromEntries(formData);
+        setPost({ ...post, ...updatedData });
         setShowEditPost(!showEditPost);
     }
 
@@ -203,6 +218,22 @@ export default function PostId({ params }) {
         const comment = await getPostComments(id)
         setComments(comment.data)
         setShowComment(!ShowComment);
+
+        const userIds = [...new Set(comment.data.map(comment => comment.user_id))];
+        const userPromises = userIds.map(id =>
+            getUserId(id).catch(error => {
+                console.error(`Failed to fetch user ${id}:`, error);
+                return null;
+            })
+        );
+        const users = await Promise.all(userPromises);
+        const map = {};
+        users.forEach(user => {
+            if (user) {
+                map[user.id] = user.name;
+            }
+        });
+        setUserMap(map);
     }
 
     const handleCommentDelete = async (id) => {
@@ -237,6 +268,7 @@ export default function PostId({ params }) {
                     <form onSubmit={handleSubmit} className="flex flex-col border bg-neutral-100 shadow-lg rounded-md p-5 m-5 w-1/2 h-1/2 text-center">
                         <input type="text" name="title" defaultValue={post.title} className="border rounded-md p-2 m-2" />
                         <textarea type="text" name="content" defaultValue={post.content} className="border rounded-md p-2 m-2" />
+                        <input type="file" name="image" />
                         <div className="mt-auto flex items-center justify-center space-x-5">
                             <button className="border rounded-md p-2 m-2 bg-blue-600 text-white">Edit Post</button>
                             <button onClick={toggleEdit} className="border rounded-md p-2 m-2 bg-blue-600 text-white">Cancel</button>

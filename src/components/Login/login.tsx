@@ -30,7 +30,6 @@ export default function Login() {
             localStorage.setItem('token', data.token)
             const user = await getCurrentUser()
             localStorage.setItem('currentUser', user.id)
-            console.log(data.token)
             console.log(localStorage.getItem('currentUser'))
             router.push(`/mainpage`)
             router.refresh()

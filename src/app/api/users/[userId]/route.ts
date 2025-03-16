@@ -2,7 +2,6 @@ import { NextResponse} from 'next/server'
 
 
 export async function getUserId(id: any) {
-    console.log(id);
     const token = localStorage.getItem('token');
     const response = await fetch(`http://localhost/api/user/${id}`, {
         method: 'GET',
@@ -18,21 +17,14 @@ export async function getUserId(id: any) {
     return user;
 }
 
-export async function EditUser(id: any, name: string, about_me: string, email: string, password: string, password_confirmation: string) {
+export async function EditUser(formData: FormData, id: any) {
     const token = localStorage.getItem('token');
-    const response = await fetch(`http://localhost/api/user/${id}`, {
-        method: 'PATCH',
+    const response = await fetch(`http://localhost/api/user/${id}?_method=patch`, {
+        method: 'POST',
         headers: {
             'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
         },
-        body: JSON.stringify({
-            name,
-            about_me,
-            email,
-            password,
-            password_confirmation
-        })
+        body: formData
     });
 
     if (!response.ok) {
@@ -108,3 +100,18 @@ export async function followsUser(id: any){
     return data;
 }
 
+export async function getSharedPost(id: any){
+    const response = await fetch(`http://localhost:80/api/share/user/${id}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    })
+
+    if(!response.ok) {
+        throw new Error(`failed to fetch user shares`)
+    }
+
+    const data = await response.json()
+    return data;
+}

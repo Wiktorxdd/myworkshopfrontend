@@ -22,7 +22,6 @@ export async function logIN(email, password){
 
 export async function logOut(){
     const token = localStorage.getItem("token");
-    console.log(token);
     const response = await fetch('http://localhost:80/api/user/log-out', {
         method: 'DELETE',
         headers: {

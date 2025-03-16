@@ -15,18 +15,22 @@ export default function SettingsPage() {
     }
 
     const handleDelete = async () => {
-        await Deleteuser(currentUser);
-        localStorage.clear
-        router.push('/');
+        if (confirm("Are you sure you want to delete your Account?")) {
+            try {
+                await Deleteuser(currentUser);
+                localStorage.clear
+            router.push('/');
+            } catch (error) {
+                console.error('Error deleting user:', error);
+                alert('Failed to delete user. Please try again.');
+            }
+        }
     };
 
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
 
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
-        const name = formData.get("name") as string;
-        const about_me = formData.get("aboutme") as string;
-        const email = formData.get("email") as string;
         const password = formData.get("password") as string;
         const password_confirmation = formData.get("password_confirmation") as string;
 
@@ -37,8 +41,7 @@ export default function SettingsPage() {
 
         try {
             const userId = currentUser;
-            const response = await EditUser(userId, name, about_me, email, password, password_confirmation);
-            console.log(response);
+            const response = await EditUser(formData, userId);
             router.push(`/profile`);
         } catch (error) {
             console.error('Error during user update:', error);
@@ -73,10 +76,10 @@ export default function SettingsPage() {
 
                                 />
                             </div>
-                            <label 
+                            <label
                                 className="mb-3 mt-5 block text-xs font-medium text-gray-900"
                                 htmlFor="aboutme"
-                                >
+                            >
                                 About me
                             </label>
                             <div className="relative">
@@ -85,6 +88,22 @@ export default function SettingsPage() {
                                     id="aboutme"
                                     type="text"
                                     name="aboutme"
+                                    placeholder="Write something about yourself"
+
+                                />
+                            </div>
+                            <label
+                                className="mb-3 mt-5 block text-xs font-medium text-gray-900"
+                                htmlFor="image"
+                            >
+                                User Image
+                            </label>
+                            <div className="relative">
+                                <input
+                                    className="peer block w-full rounded-md border border-neutral-100 bg-neutral-100 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-600"
+                                    id="image"
+                                    type="file"
+                                    name="image"
                                     placeholder="Write something about yourself"
 
                                 />

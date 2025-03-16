@@ -31,7 +31,6 @@ export default function Register() {
                 }),
             })
             if (response.ok) {
-                console.log(response)
                 router.push(`/`)
             }
         }

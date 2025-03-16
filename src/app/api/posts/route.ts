@@ -2,8 +2,25 @@ import { error } from 'console';
 import { NextResponse} from 'next/server'
 
 
-export async function getPosts() {
-    const response = await fetch('http://localhost/api/post', {
+export async function getPosts(page = 1) {
+    const response = await fetch(`http://localhost/api/post?page=${page}`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to fetch posts');
+    }
+
+    const data = await response.json();
+    return data;
+    
+}
+
+export async function getGroupPosts(id: any, page = 1) {
+    const response = await fetch(`http://localhost/api/post?page=${page}&group_id=${id}`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -27,7 +44,6 @@ export async function getPost(id: any) {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         }
     });
-    console.log(id);
     if (!response.ok) {
         throw new Error('Failed to fetch post');
     }
@@ -37,8 +53,8 @@ export async function getPost(id: any) {
 
 }
 
-export async function getUserPosts(userId: any) {
-    const response = await fetch(`http://localhost/api/post?user_id=${userId}`, {
+export async function getUserPosts(userId: any, page = 1) {
+    const response = await fetch(`http://localhost/api/post?page=${page}&user_id=${userId}`, {
         method: 'GET',
         headers: {
             'Authorization': `Bearer ${localStorage.getItem('token')}`
@@ -48,25 +64,39 @@ export async function getUserPosts(userId: any) {
         throw new Error('Failed to fetch posts');
     }
     const data = await response.json();
-    console.log(data);
     return data;
 }
 
-export async function createPost(title: string, content: string) {
-    const response = await fetch('http://localhost/api/post', {
+export async function createPost(formData: FormData) {
+    const response = await fetch('http://localhost:80/api/post', {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({
-            title,
-            content
-        })
+        body: formData
     });
 
+
     if (!response.ok) {
-        throw new Error('Failed to create post');
+        throw new Error(`Failed to create post: ${response.url}`);
+    }
+
+    const data = await response.json();
+    return data;
+}
+
+export async function createGroupPost(formData: FormData) {
+    const response = await fetch('http://localhost:80/api/post', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
+    });
+
+
+    if (!response.ok) {
+        throw new Error(`Failed to create post: ${response.url}`);
     }
 
     const data = await response.json();
@@ -88,17 +118,13 @@ export async function deletePost(id: any) {
     return response;
 }
 
-export async function editPost(id: any, title: string, content: string) {
-    const response = await fetch(`http://localhost/api/post/${id}`, {
-        method: 'PATCH',
+export async function editPost(formData: FormData, id: any) {
+    const response = await fetch(`http://localhost/api/post/${id}?_method=patch`, {
+        method: 'POST',
         headers: {
-            'Content-Type': 'application/json',
             'Authorization': `Bearer ${localStorage.getItem('token')}`
         },
-        body: JSON.stringify({
-            title,
-            content
-        })
+        body: formData
     });
 
     if (!response.ok) {
@@ -173,7 +199,7 @@ export async function getUserPostLikes(id: any) {
     }
 
     const data = await response.json();
-    console.log(data);
+
     return data;
 }
 
@@ -191,7 +217,6 @@ export async function getPostComments(id: any){
     }
 
     const data = await response.json();
-    console.log(data)
     return data;
 }
 
@@ -245,6 +270,54 @@ export async function editComment(id: any, content: string) {
 
     if (!response.ok) {
         throw new Error('Failed to create post');
+    }
+
+    const data = await response.json();
+    return data;
+}
+
+export async function sharePost(id: any) {
+    const response = await fetch(`http://localhost:80/api/share/${id}`,{
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    });
+
+    if(!response.ok) {
+        throw new Error('failed to share post')
+    }
+
+    const data = await response.json();
+    return data;
+}
+
+export async function getSharesPost(id: any) {
+    const response = await fetch(`http://localhost:80/api/share/${id}`,{
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    });
+
+    if(!response.ok) {
+        throw new Error('failed to fetch shares')
+    }
+
+    const data = await response.json();
+    return data;
+}
+
+export async function deleteSharePost(id: any) {
+    const response = await fetch(`http://localhost:80/api/share/${id}`,{
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    });
+
+    if(!response.ok) {
+        throw new Error('failed to fetch shares')
     }
 
     const data = await response.json();

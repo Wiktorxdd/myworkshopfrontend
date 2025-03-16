@@ -2,12 +2,15 @@
 
 import NewPostIcon from "@/components/svgs/newpost"
 import React, { useState, useEffect, useCallback, FormEvent } from "react";
-import { createPost } from "@/app/api/posts/route";
+import { createGroupPost } from "@/app/api/posts/route";
 import { useRouter } from "next/navigation";
+import { useParams } from 'next/navigation';
 
-export default function NewPost() {
+export default function NewGroupPost() {
     const [ShowButton, setShowButton] = useState(true);
     const router = useRouter();
+    const params = useParams();
+    const { id } = params;
 
     const toggleButton = () => {
 
@@ -19,10 +22,10 @@ export default function NewPost() {
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
-        createPost(formData);
+        const group_id = id
+        formData.append('group_id', group_id);
+        createGroupPost(formData);
         setShowButton(!ShowButton);
-        router.push("/profile");
-
     }
 
     return (

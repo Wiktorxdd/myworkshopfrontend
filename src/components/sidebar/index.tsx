@@ -5,6 +5,7 @@ import { useParams } from 'next/navigation';
 import FollowIcon from "@/components/svgs/follow";
 import UnFollowIcon from "@/components/svgs/unfollow"
 import SettingsIcon from "@/components/svgs/settings";
+import Image from 'next/image';
 
 export default function SideBar() {
     const params = useParams();
@@ -13,6 +14,7 @@ export default function SideBar() {
     const [currentUser, setCurrentUser] = useState(null);
     const [amountFollows, setAmountFollows] = useState(null);
     const [followsUserCheck, setFollowUser] = useState();
+    const [image, setImage] = useState(null);
 
     useEffect(() => {
         const fetchCurrentUser = async () => {
@@ -33,12 +35,24 @@ export default function SideBar() {
                     if (id) {
                         const fetchedUser = await getUserId(id);
                         setUser(fetchedUser);
+
+                        console.log(fetchedUser);
+                        if (fetchedUser.image.base64_data) {
+                            const base64String = fetchedUser.image.base64_data;
+                            setImage(base64String);
+                        }
+
                         const followAmount = await getFollowAmount(fetchedUser.id)
                         setAmountFollows(followAmount);
                         const followsUserCheck = await followsUser(fetchedUser.id)
                         setFollowUser(followsUserCheck);
                     } else {
                         setUser(currentUser);
+
+                        if (currentUser.image.base64_data) {
+                            const base64String = currentUser.image.base64_data;
+                            setImage(base64String);
+                        }
                         const followAmount = await getFollowAmount(currentUser.id)
                         setAmountFollows(followAmount);
                     }
@@ -58,10 +72,12 @@ export default function SideBar() {
         const followsUserCheck = await followsUser(user.id)
         setFollowUser(followsUserCheck);
     }
+    const dataUrl = `data:image/jpeg;base64,${image}`;
 
     return (
         <div className="flex">
             <div className="fixed w-64 h-screen bg-gray-200">
+                {image && <Image src={dataUrl} alt="image" width={270} height={100} quality={100} />}
                 <div className="p-10">
                     {user ? (
                         <div>
