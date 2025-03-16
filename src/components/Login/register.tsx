@@ -9,8 +9,6 @@ export default function Register() {
         event.preventDefault();
 
         const formData = new FormData(event.currentTarget);
-        const name = formData.get("name")
-        const email = formData.get("email")
         const password = formData.get("password")
         const password_confirmation = formData.get("password_confirmation")
 
@@ -20,15 +18,7 @@ export default function Register() {
         else {
             const response = await fetch('http://localhost:80/api/sign-up', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    name,
-                    email,
-                    password,
-                    password_confirmation
-                }),
+                body: formData
             })
             if (response.ok) {
                 router.push(`/`)
