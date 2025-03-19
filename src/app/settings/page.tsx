@@ -78,16 +78,16 @@ export default function SettingsPage() {
                             </div>
                             <label
                                 className="mb-3 mt-5 block text-xs font-medium text-gray-900"
-                                htmlFor="aboutme"
+                                htmlFor="about_me"
                             >
                                 About me
                             </label>
                             <div className="relative">
                                 <textarea
                                     className="peer block w-full rounded-md border border-neutral-100 bg-neutral-100 py-[9px] pl-10 text-sm outline-2 placeholder:text-gray-600"
-                                    id="aboutme"
+                                    id="about_me"
                                     type="text"
-                                    name="aboutme"
+                                    name="about_me"
                                     placeholder="Write something about yourself"
 
                                 />

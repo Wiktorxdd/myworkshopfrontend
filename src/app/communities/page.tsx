@@ -36,7 +36,6 @@ export default function Communities() {
         const fetchGroups = async () => {
             try {
                 const groups = await getGroups(currentPage)
-                console.log(groups)
                 setGroups(groups.data);
                 setLastPage(groups.last_page)
 
@@ -48,10 +47,8 @@ export default function Communities() {
                     })
                 );
                 const categories = await Promise.all(groupPromises);
-                console.log(categories)
                 const map = {};
                 categories.forEach(category => {
-                    console.log(category)
                     if (category) {
                         map[category.data.id] = category.data.name;
                     }
@@ -59,6 +56,20 @@ export default function Communities() {
                 setCatMap(map);
 
     
+            }
+            catch (error) {
+                console.error("Failed to fetch groups:", error);
+            }
+        };
+        fetchGroups();
+    }, [currentPage]);
+
+    useEffect(() => {
+        const fetchGroups = async () => {
+            try {
+                const groups = await getGroups(currentPage)
+                setGroups(groups.data);
+                setLastPage(groups.last_page)
             }
             catch (error) {
                 console.error("Failed to fetch groups:", error);

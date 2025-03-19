@@ -36,7 +36,6 @@ export default function SideBar() {
                         const fetchedUser = await getUserId(id);
                         setUser(fetchedUser);
 
-                        console.log(fetchedUser);
                         if (fetchedUser.image.base64_data) {
                             const base64String = fetchedUser.image.base64_data;
                             setImage(base64String);

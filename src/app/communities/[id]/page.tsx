@@ -59,7 +59,7 @@ export default function GroupIdPage() {
     const [commentCounts, setCommentCounts] = useState({});
     const [currentPage, setCurrentPage] = useState(1);
     const [lastPage, setLastPage] = useState(1);
-    const [shareCount, setShareCounts] = useState(null);
+    const [shareCount, setShareCounts] = useState(0);
     const [posts, setPosts] = useState([]);
     const [userMap, setUserMap] = useState({});
     const currentUser = localStorage.getItem('currentUser');
@@ -171,7 +171,7 @@ export default function GroupIdPage() {
                                 commentCount={commentCounts[post.id] || 0}
                                 handleDelete={handleDelete}
                                 handleShare={handleShare}
-                                shares={shareCount}
+                                shares={shareCount[post.id || 0]}
                             />
                         ))}
                     </ul>
