@@ -23,7 +23,6 @@ export default function GroupContainer() {
                     })
                 );
                 const categories = await Promise.all(groupPromises);
-                console.log(categories)
                 const map = {};
                 categories.forEach(category => {
                     if (category) {

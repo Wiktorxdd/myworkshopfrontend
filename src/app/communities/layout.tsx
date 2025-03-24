@@ -1,6 +1,6 @@
 import Header from "@/components/Header";
 import "../mainpage.css";
-import NewPost from "@/components/NewPost";
+import NewGroupPost from "@/components/GroupPost"
 
 export default function CommunityLayout({ 
     children
@@ -11,7 +11,7 @@ export default function CommunityLayout({
         <div>
             <Header/>
             {children}
-            <NewPost />
+            <NewGroupPost />
         </div>
     )
 }

@@ -88,7 +88,6 @@ export default function Profile() {
             try {
                 const postsData = await getUserPosts(currentUser, currentPage);
                 const fetchedPosts = postsData.data
-                console.log(fetchedPosts)
                 setPosts(fetchedPosts);
                 setLastPage(postsData.last_page)
 

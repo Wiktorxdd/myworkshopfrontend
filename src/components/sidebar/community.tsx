@@ -29,7 +29,6 @@ export default function GroupSideBar() {
             try {
                 const user = await getCurrentUser();
                 setCurrentUser(user.id);
-                console.log(user.id);
             } catch (error) {
                 console.error('Failed to fetch current user:', error);
             }
@@ -41,7 +40,6 @@ export default function GroupSideBar() {
         const fetchGroup = async () => {
             const group = await getGroupById(id);
             setGroup(group.data)
-            console.log(group.data)
             const category = await getCategoryById(group.data.category_id)
             setCategory(category.data);
 
