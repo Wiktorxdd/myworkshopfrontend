@@ -14,7 +14,6 @@ import { useRouter } from "next/navigation";
 import GroupContainer from "@/components/communitiescontainer";
 import { formatDate } from "@/utils/date";
 
-
 const PostItem = React.memo(({ post, name, handleClick, likes, shares, currentUser, handleDelete, commentCount, handleShare }) => (
     <li className="border bg-neutral-100 shadow-lg rounded-md p-5 m-5">
         <div className="flex justify-between">
@@ -73,6 +72,7 @@ export default function Home() {
         const fetchPosts = async () => {
             try {
                 const postsData = await getPosts(currentPage);
+                console.log(postsData);
                 const fetchedPosts = postsData.data;
                 setPosts(fetchedPosts);
                 setLastPage(postsData.last_page);
@@ -100,6 +100,7 @@ export default function Home() {
                     likesMap[post.id] = likesResults[index];
                 });
                 setLikes(likesMap);
+                
 
                 const commentPromises = fetchedPosts.map(post =>
                     getPostComments(post.id)
@@ -129,6 +130,7 @@ export default function Home() {
 
     const handleClick = async (id) => {
         const isLiked = await getUserPostLikes(id)
+        console.log(isLiked)
         if (isLiked.status) {
             await unlikePost(id);
         } else {

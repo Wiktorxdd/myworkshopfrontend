@@ -34,7 +34,7 @@ export default function CreateGroup() {
 
         <form className="mt-10 flex-1 justify-items-center" onSubmit={handleSubmit}>
             <div className="flex-1 rounded-lg bg-cyan-200 px-6 pb-4 pt-8 w-1/2 bg-neutral-200 shadow-xl">
-                <h1 className="mb-3 text-2xl">Change your details</h1>
+                <h1 className="mb-3 text-2xl">Fill in the group details</h1>
                 <div className="w-full">
                     <label
                         className="mb-3 mt-5 block text-xs font-medium text-gray-900"
