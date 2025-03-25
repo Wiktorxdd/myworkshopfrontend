@@ -69,7 +69,7 @@ const CommentItem = React.memo(({ comment, currentUser, toggleCommentEdit, handl
     <div className="flex flex-col items-center justify-center">
         <li className="mt-5 flex flex-col items-center border bg-neutral-100 shadow-lg rounded-md w-2/5 h-1/2 text-center">
             <div className="">
-                <Link className="underline text-blue-600" href={`/profile/${comment.user_Id}`}>
+                <Link className="underline text-blue-600" href={`/profile/${comment.user_id}`}>
                     {name}
                 </Link>
             </div>
@@ -121,7 +121,7 @@ export default function PostId({ params }) {
             const post = await getPost(id);
             setPost(post.data);
 
-            if (post.data.image.base64_data) {
+            if (post.data.imaxge.base64_data) {
                 const base64String = post.data.image.base64_data;
                 const dataUrl = `data:image/jpeg;base64,${base64String}`;
                 setImage(dataUrl);
@@ -142,6 +142,7 @@ export default function PostId({ params }) {
             const comment = await getPostComments(id)
             const fetchedComments = comment.data
             setComments(fetchedComments)
+            
 
             const userIds = [...new Set(fetchedComments.map(comment => comment.user_id))];
             const userPromises = userIds.map(id =>
